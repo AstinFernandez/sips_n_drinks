@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Ubuntu Sans' sans-serif;
+}
+body{
+    font-size: 18px;
+    font-weight: 500;
+    background-color: #E5E3E6;
+}
