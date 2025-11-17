@@ -27,19 +27,23 @@
                 <div class="header">
                     <h3>Sips and Drinks</h3>
                 </div>
+
                 <div class="menu-items">
                     <a href="/Dashboard/dashboard.html" class="top menu-item">
                         <i class="ph ph-house"></i>
                         <span>Dashboard</span>
                     </a>
+
                     <a href="/Sales Interface/sales_interface.html" class="top menu-item">
                         <i class="ph ph-sidebar"></i>
                         <span>Sales Interface</span>
                     </a>
+
                     <a href="/Order Management/order_management.html" class="top menu-item">
                         <i class="ph ph-hand-deposit"></i>
                         <span>Order Management</span>
                     </a>
+
                     <a href="/Analytics/analytics.html" class="top menu-item">
                         <i class="ph ph-chart-bar-horizontal"></i>
                         <span>Analytics</span>
@@ -53,6 +57,7 @@
                         <i class="ph ph-gear"></i>
                         <span>Settings</span>
                     </a>
+
                     <a href="/Sign in/sign_in.html" class="bottom menu-item">
                         <i class="ph ph-sign-in"></i>
                         <span>Sign Out</span>
@@ -62,16 +67,103 @@
 
             <h1 class="left">Dashboard</h1> 
         </div>
-        <div class="right">
-            <i class="ph ph-bell"></i>
-            <button class="profile-menu"><img src="" alt="Profile"></button>
+        
+        <div class="page active" id="loginPage">
+            <div class="container">
+                <h1><i class="ph ph-lock"></i> Secure Login</h1>
+                <p class="subtitle">Authorized Personnel Only</p>
+
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                </div>
+
+                <button class="page-btn"id="loginBtn" onclick="handleLogin()">Login</button>
+
+                <div class="error" id="loginError"></div>
+                <div class="loading" id="loginLoading" style="display: none;"><i class="ph ph-spinner-gap"></i>Authenticating...</div>
+            </div>
         </div>
     </header>
 
     <div class="overlay" id="overlay"></div>
 
     <main class="mainContent" id="mainContent">
+        <div class="page page-bd" id="dashboardPage">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <div>
+                        <h1 class="welcome">Dashboard</h1>
+                        <h2 class="welcomeMessage">Welcome!</h2>
+                    </div>
+                </div>
 
+                <div class="dashboard-content">
+                    <div class="stat-card">
+                        <h3>EMAIL</h3>
+                        <p id="userEmail">Loading...</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>ACCOUNT CREATED</h3>
+                        <p id="accountCreated">Loading...</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>LAST LOGIN</h3>
+                        <p id="lastlogin">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="admin-section" id="adminSection">
+            <div class="section-title">
+                <h2>Admin Panel</h2>
+            </div>
+
+            <div class="add-user-form">
+                <h3><span class="icon"><i class="ph ph-plus"></i></span></h3>
+                <div class="form-group">
+                    <label for="newUsername">Username</label>
+                    <input type="text" id="newUsername" placeholder="Enter username">
+                </div>
+
+                <div class="form-group">
+                    <label for="newEmail">Email</label>
+                    <input type="email" id="newEmail" placeholder="Enter email">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newRole">Role</label>
+                        <select id="newRole">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="page-btn"onclick="handleAddUser()">Create user</button>
+                <div class="error" id="addUserError"></div>
+                <div class="success" id="addUserSuccess"></div>
+            </div>
+
+            <div class="user-list">
+                <h3><i class="ph ph-users-three"></i>All Users</h3>
+                <div id="userList">
+                    <div class="loading">
+                        Loading users...
+                    </div>
+                </div>
+            </div>
+
+            <button class="logout-btn" onclick="handlelogout()">Logout</button>
+        </div>
     </main>
 
     <script src="/Dashboard/d.js"></script>

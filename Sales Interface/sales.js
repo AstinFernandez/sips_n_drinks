@@ -44,4 +44,23 @@ function setActiveMenuItem(){
     });
 }
 
+sidebar.addEventListener('click', (e) =>{
+    const menuItem = e.target.closest('.menu-item');
+    if(menuItem){
+        const linkPath = menuItem.getAttribute('href');
+        const currentPath = window.location.pathname;
+
+        const isCurrentPage = (linkPath === currentPath);
+        if(isCurrentPage){
+            e.preventDefault();
+            mainContent.classList.remove('blurred');
+            setTimeout(() =>{
+                if(sidebar.classList.contains('active')){
+                    mainContent.classList.add('blurred');
+                }
+            }, 300);
+        }
+    }
+});
+
 setActiveMenuItem();

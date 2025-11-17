@@ -44,4 +44,111 @@ function setActiveMenuItem(){
     });
 }
 
+
+sidebar.addEventListener('click', (e) =>{
+    const menuItem = e.target.closest('.menu-item');
+    if(menuItem){
+        const linkPath = menuItem.getAttribute('href');
+        const currentPath = window.location.pathname;
+        
+        const isCurrentPage = (linkPath.toLowerCase() === currentPath.toLowerCase());
+        if(isCurrentPage){
+            e.preventDefault();
+            mainContent.classList.remove('blurred');
+            setTimeout(() =>{
+                if(sidebar.classList.contains('active')){
+                    mainContent.classList.add('blurred');
+                }
+            }, 2000);
+        }
+    }
+});
 setActiveMenuItem();
+
+const API_URL = '/api';
+let currentUserRole = null;
+
+window.addEventListener('DOMContentLoaded', checkAuth);
+
+async function checkAuth(){
+    try{
+        const response = await fetch('${API_URL}/check-auth', {
+            credentials: 'include'
+        });
+        if(response.ok){
+            const data = await response.json();
+            showDashboard(data.user);
+        }
+    }
+    catch(error){
+        console.log('Not authenticated.');
+    }
+}
+
+async function handleLogin(){
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    const loadingDiv = document.getElementById('loginLoading');
+    const loginBtn = document.getElementById('loginBtn');
+
+    errorDiv.classList.remove('show');
+    errorDiv.textContent = '';
+
+    if(!username || !password){
+        errorDiv.textContent = 'Please enter username and password';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loadingDiv.style.display = 'block';
+
+    try{
+        const response = await fetch('${API_URL}/login', {
+            method: 'POST',
+            headers: {
+                'content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({username, password})
+        });
+
+        const data = await response.json();
+        
+        if(response.ok){
+            showDashboard(data.user);
+        }
+        else{
+            errorDiv.textContent = data.error || 'Login failed.';
+            errorDiv.classList.add('show');
+        }
+    }
+    catch(error){
+        errorDiv.textContent = 'Connection error. Make sure the server is running';
+        errorDiv.classList.add('show');
+    }
+    finally{
+        loginBtn.disabled = true;
+        loadingDiv.style.display = 'none';
+    }
+}
+
+async function handleLogout(){
+    try{
+        const response = await fetch('${API_URL}/logout',{
+            method: 'POST',
+            credentials: 'include',
+        });
+    }
+    catch(error){
+        console.error('Logout error: ', error);
+    }
+
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('dashboardPage').classList.remove('active');
+    document.getElementById('loginPage').classList.add('active');
+
+    currentUserRole = null;
+}
