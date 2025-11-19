@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/Sales Interface/s_styles.css">
+    <link rel="stylesheet" href="/public/s_styles.css">
     <link
       rel="stylesheet"
       type="text/css"
@@ -28,19 +28,19 @@
                     <h3>Sips and Drinks</h3>
                 </div>
                 <div class="menu-items">
-                    <a href="/Dashboard/dashboard.html" class="top menu-item">
+                    <a href="/public/index.html" class="top menu-item">
                         <i class="ph ph-house"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="/Sales Interface/sales_interface.html" class="top menu-item">
+                    <a href="/public/sales_interface.html" class="top menu-item">
                         <i class="ph ph-sidebar"></i>
                         <span>Sales Interface</span>
                     </a>
-                    <a href="/Order Management/order_management.html" class="top menu-item">
+                    <a href="/public/order_management.html" class="top menu-item">
                         <i class="ph ph-hand-deposit"></i>
                         <span>Order Management</span>
                     </a>
-                    <a href="/Analytics/analytics.html" class="top menu-item">
+                    <a href="/public/analytics.html" class="top menu-item">
                         <i class="ph ph-chart-bar-horizontal"></i>
                         <span>Analytics</span>
                     </a>
@@ -49,13 +49,9 @@
 
                     </div>
 
-                    <a href="/Settings/settings.html" class="bottom menu-item">
+                    <a href="/public/settings.html" class="bottom menu-item">
                         <i class="ph ph-gear"></i>
                         <span>Settings</span>
-                    </a>
-                    <a href="/Sign in/sign_in.html" class="bottom menu-item">
-                        <i class="ph ph-sign-in"></i>
-                        <span>Sign Out</span>
                     </a>
                 </div>
             </div>
@@ -76,6 +72,14 @@
 
     </div>
 
-    <script src="/Sales Interface/sales.js"></script>
+    <script src="/public/sales.js"></script>
+    <script src="/public/auth-guard.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 500);
+        });
+    </script>
 </body>
 </html>

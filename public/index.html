@@ -256,6 +256,46 @@ button.page-btn:disabled{
     display: block;
 }
 
+body.login-active #dashboardPage{
+    filter: blur(5px);
+    pointer-events: none;
+}
+
+#loginPage.active{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#loginPage.hidden{
+    display: none;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}
+
+#dashboardPage{
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 main  .dashboard-container{
     background: white;
     padding: 40px;
@@ -523,22 +563,22 @@ body.menu-open > *:not(.sidebar):not(.overlay){
                 </div>
 
                 <div class="menu-items">
-                    <a href="/Dashboard/dashboard.html" class="top menu-item">
+                    <a href="/public/index.html" class="top menu-item">
                         <i class="ph ph-house"></i>
                         <span>Dashboard</span>
                     </a>
 
-                    <a href="/Sales Interface/sales_interface.html" class="top menu-item">
+                    <a href="/public/sales_interface.html" class="top menu-item">
                         <i class="ph ph-sidebar"></i>
                         <span>Sales Interface</span>
                     </a>
 
-                    <a href="/Order Management/order_management.html" class="top menu-item">
+                    <a href="/public/order_management.html" class="top menu-item">
                         <i class="ph ph-hand-deposit"></i>
                         <span>Order Management</span>
                     </a>
 
-                    <a href="/Analytics/analytics.html" class="top menu-item">
+                    <a href="/public/analytics.html" class="top menu-item">
                         <i class="ph ph-chart-bar-horizontal"></i>
                         <span>Analytics</span>
                     </a>
@@ -547,14 +587,9 @@ body.menu-open > *:not(.sidebar):not(.overlay){
 
                     </div>
 
-                    <a href="/Settings/settings.html" class="bottom menu-item">
+                    <a href="/public/settings.html" class="bottom menu-item">
                         <i class="ph ph-gear"></i>
                         <span>Settings</span>
-                    </a>
-
-                    <a href="/Sign in/sign_in.html" class="bottom menu-item">
-                        <i class="ph ph-sign-in"></i>
-                        <span>Sign Out</span>
                     </a>
                 </div>
             </div>
@@ -634,6 +669,10 @@ body.menu-open > *:not(.sidebar):not(.overlay){
 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="newPassword">Password</label>
+                        <input type="password" id="newPassword" placeholder="Min 6 characters">
+                    </div>
+                    <div class="form-group">
                         <label for="newRole">Role</label>
                         <select id="newRole">
                             <option value="user">User</option>
@@ -656,15 +695,15 @@ body.menu-open > *:not(.sidebar):not(.overlay){
                 </div>
             </div>
 
-            <button class="logout-btn" onclick="handlelogout()">Logout</button>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
     </main>
 
     <script>
         const menuToggle = document.getElementById('menuToggle');
-const sidebar = document.getElementById('sidebar');
-const mainContent = document.getElementById('mainContent');
-const overlay = document.getElementById('overlay');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('overlay');
 
 function toggleMenu(){
     sidebar.classList.toggle('active');
@@ -730,8 +769,13 @@ setActiveMenuItem();
 
 const API_URL = `/api`;
 let currentUserRole = null;
+let authChecked = false;
 
-window.addEventListener('DOMContentLoaded', checkAuth);
+window.addEventListener('DOMContentLoaded', () => {
+    if(!authChecked){
+        checkAuth();
+    }
+});
 
 async function checkAuth(){
     try{
@@ -740,12 +784,31 @@ async function checkAuth(){
         });
         if(response.ok){
             const data = await response.json();
+            document.body.classList.remove('login-active');
+            document.getElementById('loginPage').classList.add('hidden');
             showDashboard(data.user);
+        }
+        else{
+            showLoginOverlay();
         }
     }
     catch(error){
         console.log('Not authenticated.');
+        showLoginOverlay();
     }
+}
+
+function showLoginOverlay(){
+    document.body.classList.add('login-active');
+    document.getElementById('loginPage').classList.remove('hidden');
+    document.getElementById('loginPage').classList.add('active');
+    document.getElementById('dashboardPage').classList.remove('active');
+}
+
+function hideLoginOverlay(){
+    document.body.classList.remove('login-active');
+    document.getElementById('loginPage').classList.add('hidden');
+    document.getElementById('loginPage').classList.remove('active');
 }
 
 async function handleLogin(){
@@ -821,10 +884,10 @@ async function showDashboard(user){
     document.getElementById('dashboardPage').classList.remove('active');
 
     currentUserRole = user.role;
-    document.getElementById('WelcomeMessage').innerHTML = 'Welcome, ${user.username}!';
+    document.getElementById('welcomeMessage').innerHTML = `Welcome, ${user.username}!`;
     if(user.role === 'admin'){
-        document.getElementById('welcomeMessage').innerHTML += '<span class = "admin-badge">ADMIN</span>';
-        document.getElementById('adminSection').display.style = 'block';
+        document.getElementById('welcomeMessage').innerHTML += `<span class = "admin-badge">ADMIN</span>`;
+        document.getElementById('adminSection').style.display = 'block';
         loadUsers();
     }
     document.getElementById('userEmail').textContent = user.email;
@@ -834,6 +897,166 @@ async function showDashboard(user){
 
     const lastLoginDate = user.last_login? new Date(user.last_login).toLocaleString(): 'just now';
 }
+
+async function loadUsers(){
+    try{
+        const response = await fetch(`${API_URL}/admin/users`,{
+            credentials: 'include'
+        });
+        if(response.ok){
+            const data = await response.json();
+            if(data.users.length === 0){
+                userListDiv.innerHTML = '<div class="empty-state"><i class="ph ph-users"></i><p>No users yet</p></div>';
+                return; 
+            }
+            userListDiv.innerHTML = data.users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <strong>${user.username}</strong>
+                        <small>${user.email}</small>
+                        <span class="user-role role-${user.role}">${user.role.toUpperCase()}</span>
+                    </div>
+                    ${user.id !== currentUserId ? `<button class="delete-btn" onclick="deleteUser(${user.id})">Delete</button>` : ''}
+                </div>
+                `).join('');
+        }
+    }catch(error){
+        user.ListDiv.innerHTML = '<div class="error show">Failed to load users</div>';
+    }
+}
+
+function displayUsers(users){
+    const usersList = document.getElementById('userList');
+    if(users.length === 0){
+        usersList.innerHTML = `
+            <div class="empty-state">
+                <div class="icon"><i class="ph ph-users"></i>
+                    <p>No users found</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    userList.innerHTML = users.map(user => `
+        <div class="user-item">
+            <div class="user-info">
+                <strong>${user.username}<span class="user-role role-${user.role}">${user.role.toUpperCase()}</span></strong>
+                <small><i class="ph ph-mailbox"></i> ${user.email}. <i class="ph ph-calendar-blank"></i> Joined ${new Date(user.created_at).toLocaleDateString()}</small>
+            </div>
+            <button class="delete-btn" onclick="handleDeleteUser(${user.id}, '${user.username}')"><i class="ph ph-trash-simple"></i></button>
+        </div>
+    `).join('');
+}
+
+function isValidEmail(email){
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+async function handleAddUser(){
+    const username = document.getElementById('newUsername').value.trim();
+    const email = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+    const errorDiv = document.getElementById('addUserError');
+    const successDiv = document.getElementById('addUserSuccess');
+
+    errorDiv.classList.remove('show');
+    successDiv.classList.remove('show');
+
+    if(!username || !email || !password){
+        errorDiv.textContent = 'All fields are required!';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    if(username.length < 3){
+        errorDiv.textContent = 'Username must be at least 3 characters';
+        errorDiv.classList.add('show');
+    }
+
+    if(!isValidEmail(email)){
+        errorDiv.textContent = 'Please enter a valid email';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    if(password.length < 6){
+        errorDiv.textContent = 'Password must be at leasr 6 characters.';
+        errorDiv.classList.add('show');
+    }
+
+    if(!['user', 'admin'].includes(role)){
+        errorDiv.textContent = 'Invalid role selected';
+        errorDiv.classList.add('show');
+        return;
+    }
+
+    try{
+        const response = await fetch(`${API_URL}/admin/register`, {
+            method: 'POST',
+            headers : {
+                'Content-Type' : 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({username, email, password, role})
+        });
+        
+        const data = await response.json();
+        if(response.ok){
+            successDiv.textContent = 'User "${username}" created successfully.';
+            successDiv.classList.add('show');
+
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newEmail').value = '';
+            document.getElemebtById('newPassword').value = '';
+            document.getElementById('newRole').value = '';
+
+            loadUsers();
+
+            setTimeout(() => successDiv.classList.remove('show'), 3000);
+        }
+        else{
+            errorDiv.textContent = data.error || 'Failed to add user.';
+            errorDiv.classList.add('show');
+        }
+    }
+    catch(error){
+        errorDiv.textContent = 'Connection error';
+        errorDiv.classList.add('show');
+    }
+}
+
+async function handleDeleteUser(userId, username){
+    if(!confirm(`Are you sure you want to delete user "${username}"?`)){
+        return;
+    }
+    try{
+        const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        if(response.ok){
+            loadUsers();
+        }
+        else{
+            alert(data.error || 'Failed to delete user.');
+        }
+    }
+    catch(error){
+        alert('Connection error');
+    }
+}
+
+document.addEventListener('keypress', (e) =>{
+    if(e.key === 'Enter' && document.getElementById('loginPage').classList.contains('active')){
+        handleLogin();
+    }
+});
+
     </script>
 </body>
 </html>

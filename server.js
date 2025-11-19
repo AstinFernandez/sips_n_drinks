@@ -1,4 +1,3 @@
-// server.js - Combined Frontend + Backend Server
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
@@ -9,11 +8,9 @@ require('dotenv').config();
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
     resave: false,
@@ -25,10 +22,8 @@ app.use(session({
     }
 }));
 
-// Serve static files from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Database connection
 const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
@@ -38,7 +33,6 @@ const pool = mysql.createPool({
     connectionLimit: 10
 });
 
-// Initialize database
 async function initDatabase() {
     try {
         const connection = await pool.getConnection();
@@ -62,7 +56,6 @@ async function initDatabase() {
 
 initDatabase();
 
-// Middleware
 function isAuthenticated(req, res, next) {
     if (req.session.userId) {
         next();
@@ -79,9 +72,7 @@ function isAdmin(req, res, next) {
     }
 }
 
-// ============= API ROUTES =============
 
-// LOGIN
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -124,7 +115,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// LOGOUT
 app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -135,7 +125,6 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// CHECK AUTH
 app.get('/api/check-auth', isAuthenticated, async (req, res) => {
     try {
         const [users] = await pool.query(
@@ -153,7 +142,6 @@ app.get('/api/check-auth', isAuthenticated, async (req, res) => {
     }
 });
 
-// ADMIN: REGISTER USER
 app.post('/api/admin/register', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const { username, email, password, role } = req.body;
@@ -195,7 +183,6 @@ app.post('/api/admin/register', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// ADMIN: GET ALL USERS
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const [users] = await pool.query(
@@ -207,7 +194,6 @@ app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// ADMIN: DELETE USER
 app.delete('/api/admin/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const userId = req.params.id;
@@ -228,19 +214,16 @@ app.delete('/api/admin/users/:id', isAuthenticated, isAdmin, async (req, res) =>
     }
 });
 
-// Start server
+
 app.listen(PORT, () => {
     console.log(`
-╔════════════════════════════════════════╗
-║   Server Running Successfully! 🚀      ║
-╚════════════════════════════════════════╝
+   Server Running Successfully!    
 
-📍 Frontend URL: http://localhost:${PORT}
-📍 API URL:      http://localhost:${PORT}/api
+ Frontend URL: http://localhost:${PORT}
+ API URL:      http://localhost:${PORT}/api
 
-🌐 Open your browser and go to:
+ Open your browser and go to:
    http://localhost:${PORT}
 
-⚠️  Don't forget to create your first admin user!
     `);
 });
